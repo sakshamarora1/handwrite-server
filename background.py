@@ -4,8 +4,8 @@ import tempfile
 import gc
 import time
 from uuid import uuid4
+import subprocess
 
-from handwrite.cli import converters
 
 import firebase_admin
 from firebase_admin import credentials
@@ -20,7 +20,7 @@ bucket = storage.bucket("handwrite-2bb53.appspot.com")
 CURRENT_Q = []  # TODO Use Queue?
 
 
-def handwrite_background():
+def handwrite_background(use_firebase=False):
     server_dir = os.path.dirname(os.path.abspath(__file__))
     dirs = {}
 
@@ -48,11 +48,16 @@ def handwrite_background():
             temp_dir = tempfile.mkdtemp()
             os.makedirs(dirs["outfiles"] + os.sep + name)
             try:
-                converters(
-                    dirs["infiles"] + os.sep + image_name,
-                    temp_dir,
-                    dirs["outfiles"] + os.sep + name,
-                    os.path.dirname(os.path.abspath(__file__)) + "/default.json",
+                subprocess.call(
+                    [
+                        "handwrite",
+                        dirs["infiles"] + os.sep + image_name,
+                        dirs["outfiles"] + os.sep + name,
+                        "--directory",
+                        temp_dir,
+                        "--config",
+                        os.path.dirname(os.path.abspath(__file__)) + "/default.json",
+                    ]
                 )
                 try:
                     metadata = {"firebaseStorageDownloadTokens": uuid4()}
@@ -60,7 +65,7 @@ def handwrite_background():
                     blob.metadata = metadata
                     blob.upload_from_filename(dirs["infiles"] + os.sep + image_name)
                 except:
-                    print(f"Image Upload Failed: {image_name}")
+                    print(f"Firebase: Image Upload Failed: {image_name}")
             except:
                 open(dirs["error"] + os.sep + name, "w").close()
                 print(f"Unable to process Image: {image_name}")
@@ -77,10 +82,12 @@ def handwrite_background():
             for dir_name in ["outfiles", "error"]:
                 for fd in os.listdir(dirs[dir_name]):
                     path = dirs[dir_name] + os.sep + fd
-                    if (time.time() - os.stat(path).st_mtime) / 60 > 5:
+                    if (time.time() - os.stat(path).st_mtime) / 60 > 10:
                         print(f"Deleting: {path}")
                         if dir_name == "outfiles":
                             shutil.rmtree(path)
                         else:
                             os.remove(path)
             prev_time = time.time()
+
+        time.sleep(0.1)
