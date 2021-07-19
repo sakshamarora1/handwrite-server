@@ -51,7 +51,7 @@ def handwrite_background():
             temp_dir = tempfile.mkdtemp()
             os.makedirs(dirs["outfiles"] + os.sep + name)
             try:
-                subprocess.call(
+                subprocess.check_output(
                     [
                         "handwrite",
                         dirs["infiles"] + os.sep + image_name,
