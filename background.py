@@ -59,13 +59,14 @@ def handwrite_background(use_firebase=False):
                         os.path.dirname(os.path.abspath(__file__)) + "/default.json",
                     ]
                 )
-                try:
-                    metadata = {"firebaseStorageDownloadTokens": uuid4()}
-                    blob = bucket.blob(name)
-                    blob.metadata = metadata
-                    blob.upload_from_filename(dirs["infiles"] + os.sep + image_name)
-                except:
-                    print(f"Firebase: Image Upload Failed: {image_name}")
+                if use_firebase:
+                    try:
+                        metadata = {"firebaseStorageDownloadTokens": uuid4()}
+                        blob = bucket.blob(name)
+                        blob.metadata = metadata
+                        blob.upload_from_filename(dirs["infiles"] + os.sep + image_name)
+                    except:
+                        print(f"Firebase: Image Upload Failed: {image_name}")
             except:
                 open(dirs["error"] + os.sep + name, "w").close()
                 print(f"Unable to process Image: {image_name}")
