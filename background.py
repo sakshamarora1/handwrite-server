@@ -11,16 +11,19 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import storage
 
-if not firebase_admin._apps:
-    cred = credentials.Certificate("firebasekey.json")
-    firebase_admin.initialize_app(cred)
+use_firebase = False
+if os.path.exists("firebasekey.json"):
+    use_firebase = True
+    if not firebase_admin._apps:
+        cred = credentials.Certificate("firebasekey.json")
+        firebase_admin.initialize_app(cred)
 
-bucket = storage.bucket("handwrite-2bb53.appspot.com")
+    bucket = storage.bucket("handwrite-2bb53.appspot.com")
 
 CURRENT_Q = []  # TODO Use Queue?
 
 
-def handwrite_background(use_firebase=False):
+def handwrite_background():
     server_dir = os.path.dirname(os.path.abspath(__file__))
     dirs = {}
 
