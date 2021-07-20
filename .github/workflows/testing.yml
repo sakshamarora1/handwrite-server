@@ -11,7 +11,7 @@ jobs:
 
       - name: Create firebasekey.json
         uses: jsdaniell/create-json@1.1.2
-        if: github.ref == 'refs/head/main'
+        if: github.ref == 'refs/heads/main'
         with:
           name: "firebasekey.json"
           json: ${{ secrets.FIREBASE_KEY }}
@@ -19,7 +19,7 @@ jobs:
       - name: Build, Push and Deploy to Heroku Main Server
         id: heroku-main
         uses: akhileshns/heroku-deploy@v3.12.12
-        if: github.ref == 'refs/head/main'
+        if: github.ref == 'refs/heads/main'
         with:
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
@@ -30,7 +30,7 @@ jobs:
       - name: Build, Push and Deploy to Heroku Test Server
         id: heroku-test
         uses: akhileshns/heroku-deploy@v3.12.12
-        if: github.ref != 'refs/head/main'
+        if: github.ref != 'refs/heads/main'
         with:
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
