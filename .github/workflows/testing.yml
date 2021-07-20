@@ -10,11 +10,15 @@ jobs:
         uses: actions/checkout@v2
       
       - name: Set environment for branch
+        # else
+            # echo "HEROKU_APP_NAME=$GITHUB_ENV.HEROKU_TEST_APP_NAME" >> "$GITHUB_ENV"
+        env:
+          HEROKU_APP_NAME = ${{ secrets.HEROKU_APP_NAME }}
+          HEROKU_TEST_APP_NAME = ${{ secrets.HEROKU_TEST_APP_NAME }}
+        
         run: |
-          if [[ $GITHUB_REF == 'refs/heads/master' ]]; then
-              echo "HEROKU_APP_NAME=$secrets.HEROKU_APP_NAME" >> "$GITHUB_ENV"
-          else
-              echo "HEROKU_APP_NAME=$secrets.HEROKU_TEST_APP_NAME" >> "$GITHUB_ENV"
+          if [[ $GITHUB_REF != 'refs/heads/master' ]]; then
+              echo "HEROKU_APP_NAME=$GITHUB_ENV.HEROKU_TEST_APP_NAME" >> "$GITHUB_ENV"
           fi
 
       - name: Create firebasekey.json
