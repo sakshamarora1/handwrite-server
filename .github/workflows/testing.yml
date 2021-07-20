@@ -1,6 +1,6 @@
 name: 'Tests'
 
-on: [push, pull_request]
+on: push
 
 jobs:
   build:
@@ -8,25 +8,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+        env:
+          HEROKU_APP_NAME = ${{ secrets.HEROKU_TEST_APP_NAME }}
 
       - name: Create firebasekey.json
         uses: jsdaniell/create-json@1.1.2
         if: github.ref == 'refs/head/main'
+        env:
+          HEROKU_APP_NAME = ${{ secrets.HEROKU_APP_NAME }}
         with:
           name: "firebasekey.json"
           json: ${{ secrets.FIREBASE_KEY }}
           
+      # If main, HEROKU_APP_NAME else HEROKU_TEST_APP_NAME
       - name: Build, Push and Deploy to Heroku
         id: heroku
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          heroku_app_name: ${{ env.HEROKU_APP_NAME }}
           usedocker: True
           stack: container
