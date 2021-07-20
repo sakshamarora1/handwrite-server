@@ -1,4 +1,4 @@
-name: 'Tests'
+name: "Tests"
 
 on: push
 
@@ -8,18 +8,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      
-      - name: Set environment for branch
-        # else
-            # echo "HEROKU_APP_NAME=$GITHUB_ENV.HEROKU_TEST_APP_NAME" >> "$GITHUB_ENV"
-        env:
-          HEROKU_APP_NAME = ${{ secrets.HEROKU_APP_NAME }}
-          HEROKU_TEST_APP_NAME = ${{ secrets.HEROKU_TEST_APP_NAME }}
-        
-        run: |
-          if [[ $GITHUB_REF != 'refs/heads/master' ]]; then
-              echo "HEROKU_APP_NAME=$GITHUB_ENV.HEROKU_TEST_APP_NAME" >> "$GITHUB_ENV"
-          fi
 
       - name: Create firebasekey.json
         uses: jsdaniell/create-json@1.1.2
@@ -27,13 +15,25 @@ jobs:
         with:
           name: "firebasekey.json"
           json: ${{ secrets.FIREBASE_KEY }}
-          
-      - name: Build, Push and Deploy to Heroku
-        id: heroku
+
+      - name: Build, Push and Deploy to Heroku Main Server
+        id: heroku-main
         uses: akhileshns/heroku-deploy@v3.12.12
+        if: github.ref == 'refs/head/main'
         with:
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ env.HEROKU_APP_NAME }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          usedocker: True
+          stack: container
+
+      - name: Build, Push and Deploy to Heroku Test Server
+        id: heroku-test
+        uses: akhileshns/heroku-deploy@v3.12.12
+        if: github.ref != 'refs/head/main'
+        with:
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_TEST_APP_NAME }}
           usedocker: True
           stack: container
