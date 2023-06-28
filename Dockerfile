@@ -5,7 +5,7 @@ WORKDIR /app
 RUN apt-get update
 RUN apt-get install ffmpeg libsm6 libxext6 -y
 RUN apt-get install -y fontforge potrace git
-RUN git clone --depth 1 --branch main https://github.com/cod-ed/handwrite
+RUN git clone --depth 1 --branch main https://github.com/builtree/handwrite
 RUN cd handwrite && pip install -e .
 ENV PORT=5000
 COPY . .
