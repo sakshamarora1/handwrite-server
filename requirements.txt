@@ -1,6 +1,8 @@
-Flask==2.2.2
+Flask==2.2.5
+Werkzeug==2.3.8
 gunicorn
 numpy
+opencv-python-headless
 flask-cors
 firebase-admin
 google-cloud-storage

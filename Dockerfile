@@ -1,15 +1,20 @@
-FROM python:3.8-slim-buster
+FROM python:3.11-slim-bookworm
 
 WORKDIR /app
 
-RUN apt-get update
-RUN apt-get install ffmpeg libsm6 libxext6 -y
-RUN apt-get install -y fontforge potrace git
-RUN git clone --depth 1 --branch main https://github.com/sakshamarora1/handwrite
-RUN cd handwrite && pip install -e .
-ENV PORT=5000
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ffmpeg libsm6 libxext6 fontforge potrace git && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN git clone --depth 1 --branch main https://github.com/sakshamarora1/handwrite && \
+    cd handwrite && pip install --no-cache-dir -e .
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . .
-RUN pip install -r requirements.txt
-COPY default.json default.json
+
+ENV PORT=5000
 
 CMD ["gunicorn", "app:create_app()", "--log-level", "debug", "--timeout", "90", "--workers", "2", "--max-requests", "20", "--config", "config.py"]
